@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aurum Steps</title>
+<meta name="theme-color" content="#0B0B0C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Aurum Steps">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" id="manifestLink">
+<link rel="apple-touch-icon" id="touchIcon">
+<style>
+:root{--bg:#0B0B0C;--panel:#141416;--gold:#D4AF37;--gold-soft:rgba(212,175,55,.28);--ivory:#F4F4F6;--mute:#9A9AA2;--line:rgba(212,175,55,.22);
+--serif:"Cormorant Garamond","Playfair Display",Didot,"Bodoni 72",Georgia,"Times New Roman",serif}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg)}
+body{min-height:100vh;background:radial-gradient(120% 60% at 50% 0%,#1a1710 0%,var(--bg) 60%);color:var(--ivory);font-family:var(--serif);
+-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;padding:max(20px,env(safe-area-inset-top)) 20px max(28px,env(safe-area-inset-bottom))}
+main{max-width:460px;margin:0 auto;display:flex;flex-direction:column;gap:26px}
+header{text-align:center;padding-top:6px}
+.clock{font-size:2.5rem;font-weight:500;letter-spacing:.06em;font-variant-numeric:lining-nums tabular-nums;color:var(--gold)}
+.date{font-size:1rem;color:var(--mute);font-style:italic;margin-top:2px}
+.quote{font-size:1.08rem;line-height:1.5;font-style:italic;margin:14px auto 0;max-width:34ch;color:var(--ivory);opacity:.88}
+.ringwrap{position:relative;width:min(78vw,320px);aspect-ratio:1;margin:0 auto}
+.ringwrap svg{width:100%;height:100%;transform:rotate(-90deg);overflow:visible}
+.track{fill:none;stroke:#1f1f22;stroke-width:10}
+.bar{fill:none;stroke:url(#g);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .8s cubic-bezier(.2,.8,.2,1);filter:drop-shadow(0 0 8px var(--gold-soft))}
+.center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.steps{font-size:clamp(3.6rem,19vw,5.4rem);font-weight:500;line-height:1;font-variant-numeric:lining-nums tabular-nums;letter-spacing:.01em}
+.sub{font-size:1.05rem;color:var(--mute);margin-top:8px;font-style:italic}
+.pct{font-size:1.05rem;color:var(--gold);margin-top:4px}
+.status{text-align:center;font-size:1rem;color:var(--mute);min-height:1.4em}
+.status b{color:var(--gold);font-weight:600}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.cell{background:var(--panel);padding:18px 16px;text-align:center}
+.cell .v{font-size:2rem;font-weight:500;font-variant-numeric:lining-nums tabular-nums}
+.cell .u{font-size:.95rem;color:var(--gold);margin-left:4px}
+.cell .l{font-size:1rem;color:var(--mute);font-style:italic;margin-top:2px}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.controls .wide{grid-column:1/-1}
+button{font:inherit;font-size:1.15rem;letter-spacing:.04em;color:var(--ivory);background:transparent;border:1px solid var(--gold);border-radius:3px;padding:15px 12px;cursor:pointer;
+transition:transform .18s ease,box-shadow .25s ease,background .25s ease,color .25s ease;min-height:52px}
+button.primary{background:var(--gold);color:#0B0B0C;font-weight:700}
+button:hover{box-shadow:0 0 22px var(--gold-soft);transform:translateY(-1px)}
+button:active{transform:scale(.96);box-shadow:0 0 30px rgba(212,175,55,.5)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--ivory);outline-offset:3px;box-shadow:0 0 0 6px var(--gold)}
+button:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+button.ghost{border-color:var(--line);color:var(--mute)}
+h2{font-size:1.35rem;font-weight:500;color:var(--gold);margin-bottom:12px;letter-spacing:.03em}
+.week{display:flex;flex-direction:column}
+.row{display:grid;grid-template-columns:70px 1fr 64px;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:1.05rem}
+.row .d{color:var(--mute)}
+.row .t{height:6px;background:#1f1f22;border-radius:3px;overflow:hidden}
+.row .t i{display:block;height:100%;background:linear-gradient(90deg,#8a6d1c,var(--gold));border-radius:3px}
+.row .n{text-align:right;font-variant-numeric:lining-nums tabular-nums}
+.row.today .d{color:var(--ivory)}
+.set{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+label{display:flex;flex-direction:column;gap:6px;font-size:1rem;color:var(--mute);font-style:italic}
+input{font:inherit;font-size:1.15rem;color:var(--ivory);background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:11px 10px;width:100%}
+.note{font-size:.95rem;color:var(--mute);text-align:center;line-height:1.5;font-style:italic}
+.meals{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.meals button{font-size:1rem;padding:12px 6px}
+.coach{border:1px solid var(--line);background:var(--panel);border-radius:4px;padding:16px;margin-top:14px;line-height:1.5;font-size:1.05rem}
+.coach .big{font-size:1.5rem;color:var(--gold);margin-bottom:6px}
+.coach .t{height:6px;background:#1f1f22;border-radius:3px;overflow:hidden;margin:10px 0}
+.coach .t i{display:block;height:100%;background:linear-gradient(90deg,#8a6d1c,var(--gold));transition:width .6s}
+.coach .warn{color:var(--mute);font-style:italic;font-size:.95rem;margin-top:8px}
+#toast{position:fixed;left:50%;bottom:max(24px,env(safe-area-inset-bottom));transform:translate(-50%,30px);background:var(--panel);border:1px solid var(--gold);color:var(--ivory);padding:14px 18px;border-radius:3px;max-width:88vw;text-align:center;font-size:1.02rem;line-height:1.4;opacity:0;pointer-events:none;transition:all .35s ease;z-index:9}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="clock" id="clock" aria-label="Current time">00:00:00</div>
+    <div class="date" id="date"></div>
+    <p class="quote" id="quote"></p>
+  </header>
+
+  <section class="ringwrap" aria-label="Daily step progress">
+    <svg viewBox="0 0 260 260" aria-hidden="true">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F3E3A0"/><stop offset=".5" stop-color="#D4AF37"/><stop offset="1" stop-color="#9c7a1a"/></linearGradient></defs>
+      <circle class="track" cx="130" cy="130" r="118"/>
+      <circle class="bar" id="bar" cx="130" cy="130" r="118"/>
+    </svg>
+    <div class="center">
+      <div class="steps" id="steps" role="status" aria-live="polite">0</div>
+      <div class="sub" id="goalTxt">of 10,000 steps</div>
+      <div class="pct" id="pct">0%</div>
+    </div>
+  </section>
+
+  <div class="status" id="status" role="status" aria-live="polite">Ready when you are.</div>
+
+  <section class="grid" aria-label="Statistics">
+    <div class="cell"><span class="v" id="dist">0.00</span><span class="u">km</span><div class="l">Distance</div></div>
+    <div class="cell"><span class="v" id="cal">0</span><span class="u">kcal</span><div class="l">Calories burned</div></div>
+    <div class="cell"><span class="v" id="act">0</span><span class="u">min</span><div class="l">Active time</div></div>
+    <div class="cell"><span class="v" id="pace">--</span><span class="u">min/km</span><div class="l">Pace</div></div>
+  </section>
+
+  <section class="controls" aria-label="Controls">
+    <button class="primary wide" id="startBtn">Start Tracking</button>
+    <button id="pauseBtn" disabled>Pause Tracking</button>
+    <button id="resetBtn" class="ghost">Reset Metrics</button>
+  </section>
+
+  <section>
+    <h2>Meal coach</h2>
+    <div class="meals" role="group" aria-label="Log a meal">
+      <button data-meal="snack">Light snack</button>
+      <button data-meal="regular">Regular meal</button>
+      <button data-meal="full">Full meal</button>
+    </div>
+    <div class="coach" id="coach" role="status" aria-live="polite"></div>
+  </section>
+
+  <section>
+    <h2>Past seven days</h2>
+    <div class="week" id="week"></div>
+  </section>
+
+  <section>
+    <h2>Your profile</h2>
+    <div class="set">
+      <label>Height (cm)<input id="inH" type="number" inputmode="numeric" min="100" max="230" step="1"></label>
+      <label>Weight (kg)<input id="inW" type="number" inputmode="numeric" min="30" max="250" step="1"></label>
+      <label>Daily goal<input id="inG" type="number" inputmode="numeric" min="1000" max="100000" step="500"></label>
+    </div>
+    <p class="note" style="margin-top:14px">Height sets your stride length and weight sets calories. Keep the app open and the phone on you while tracking.</p>
+  </section>
+</main>
+<div id="toast" role="alert"></div>
+
+<script>
+(function(){
+"use strict";
+var KEY="aurum-steps-v1";
+var QUOTES=["Every step is a quiet act of devotion to your future self.","Walk as though the ground were honoured by your feet.","Strength is built one unhurried step at a time.","The best journeys begin with a single, deliberate stride.","Health is the finest wealth, and walking is its currency.","Move with intention; the day rewards those who arrive on foot.","A steady pace outlasts a hurried sprint."];
+var DAYS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+var $=function(id){return document.getElementById(id)};
+var CIRC=2*Math.PI*118;
+var bar=$("bar");bar.style.strokeDasharray=CIRC;bar.style.strokeDashoffset=CIRC;
+
+function dayKey(d){d=d||new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+var S={date:dayKey(),steps:0,activeSec:0,goal:10000,height:170,weight:70,history:{},tracking:false,meal:null};
+var MEALS={snack:{name:"light snack",target:500,wait:5},regular:{name:"regular meal",target:1200,wait:10},full:{name:"full meal",target:2000,wait:15}};
+function load(){try{var r=localStorage.getItem(KEY);if(r){var o=JSON.parse(r);if(o&&typeof o==="object"){for(var k in S){if(o[k]!==undefined)S[k]=o[k]}}}}catch(e){}
+if(S.meal&&(typeof S.meal!=="object"||!MEALS[S.meal.type]||!isFinite(+S.meal.time)||!isFinite(+S.meal.base)))S.meal=null;
+S.steps=Math.max(0,+S.steps||0);S.activeSec=Math.max(0,+S.activeSec||0);S.goal=+S.goal>=1000?+S.goal:10000;S.height=+S.height>=100?+S.height:170;S.weight=+S.weight>=30?+S.weight:70;if(!S.history||typeof S.history!=="object")S.history={};}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function toast(m,ms){var t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(function(){t.classList.remove("show")},ms||4200)}
+function status(h){$("status").innerHTML=h}
+
+/* ---------- metrics ---------- */
+function stride(){return S.height*0.415/100} /* metres */
+function km(){return S.steps*stride()/1000}
+function kcal(){return km()*S.weight*0.57}
+function fmt(n){return n.toLocaleString("en-US")}
+function render(){
+  var p=Math.min(1,S.steps/S.goal);
+  $("steps").textContent=fmt(S.steps);
+  $("goalTxt").textContent="of "+fmt(S.goal)+" steps";
+  $("pct").textContent=Math.floor(p*100)+"%"+(p>=1?" · Goal reached":"");
+  bar.style.strokeDashoffset=CIRC*(1-p);
+  var d=km(),m=S.activeSec/60;
+  $("dist").textContent=d.toFixed(2);
+  $("cal").textContent=Math.round(kcal());
+  $("act").textContent=Math.floor(m);
+  $("pace").textContent=(d>=0.05&&m>0)?(function(){var pc=m/d;var mm=Math.floor(pc),ss=Math.round((pc-mm)*60);if(ss===60){mm++;ss=0}return mm+":"+String(ss).padStart(2,"0")})():"--";
+  renderWeek();
+}
+function renderWeek(){
+  var h=$("week"),out="",max=S.goal,i,d,k,v;
+  for(i=0;i<S.history.length;i++){}
+  var rows=[];
+  for(i=0;i<7;i++){d=new Date();d.setDate(d.getDate()-i);k=dayKey(d);v=i===0?S.steps:(+S.history[k]||0);rows.push({d:d,v:v,today:i===0})}
+  rows.forEach(function(r){max=Math.max(max,r.v)});
+  rows.forEach(function(r){
+    out+='<div class="row'+(r.today?' today':'')+'"><span class="d">'+(r.today?"Today":DAYS[r.d.getDay()])+'</span><span class="t"><i style="width:'+Math.round(r.v/max*100)+'%"></i></span><span class="n">'+fmt(r.v)+'</span></div>';
+  });
+  h.innerHTML=out;
+}
+function rollover(){
+  var k=dayKey();
+  if(k!==S.date){S.history[S.date]=S.steps;
+    var keys=Object.keys(S.history).sort();while(keys.length>60){delete S.history[keys.shift()]}
+    S.date=k;S.steps=0;S.activeSec=0;S.meal=null;pending=0;streak=0;save();render();}
+}
+
+/* ---------- meal coach ---------- */
+function logMeal(type){
+  var m=MEALS[type];if(!m)return;
+  S.meal={type:type,time:Date.now(),base:S.steps,target:m.target};save();renderCoach();
+  toast("Logged: "+m.name+". Your post-meal walk target is "+fmt(m.target)+" steps.",3600);
+}
+function renderCoach(){
+  var el=$("coach"),m=S.meal,h="";
+  var caution='<div class="warn">General wellness guidance, not medical advice. If you have diabetes, heart or blood-pressure conditions, or are pregnant, ask your doctor for your own target. Stop and rest if you feel dizzy, short of breath or have chest pain.</div>';
+  if(!m){el.innerHTML='<div class="big">No meal logged</div>Tap what you just ate and I will set an easy post-meal walk target for you.'+caution;return}
+  var info=MEALS[m.type],mins=(Date.now()-m.time)/60000,done=Math.max(0,S.steps-m.base),rem=Math.max(0,m.target-done),p=Math.min(1,done/m.target);
+  var live=S.tracking&&Date.now()-lastActive<3000;
+  if(rem===0){h='<div class="big">Walk complete</div>You walked '+fmt(done)+' steps after your '+info.name+'. Well done.'}
+  else if(mins<info.wait&&done===0){h='<div class="big">Rest first</div>Sit comfortably for about '+Math.ceil(info.wait-mins)+' more min, then take an easy walk of '+fmt(m.target)+' steps.'}
+  else{h='<div class="big">Walk now</div>'+fmt(rem)+' more steps, about '+Math.ceil(rem/100)+' min at an easy pace.'}
+  h+='<div class="t"><i style="width:'+Math.round(p*100)+'%"></i></div>'+fmt(done)+' / '+fmt(m.target)+' steps since your '+info.name;
+  if(rem>0&&!S.tracking)h+='<div class="warn">Tracking is off. Tap Start Tracking so I can count this walk.</div>';
+  if(rem>0&&live&&cad>135)h+='<div class="warn">You are moving fast. Keep it gentle for the first 30 minutes after eating.</div>';
+  if(rem>0&&mins>120)h+='<div class="warn">Your meal was over two hours ago. A gentle walk still helps.</div>';
+  el.innerHTML=h+caution;
+}
+
+/* ---------- clock ---------- */
+function tick(){
+  var n=new Date();
+  $("clock").textContent=n.toLocaleTimeString("en-GB",{hour12:false});
+  $("date").textContent=n.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
+  rollover();renderCoach();
+}
+
+/* ---------- step detection ---------- */
+var cad=0,slow=null,fast=0,amp=1,above=false,lastStep=0,streak=0,pending=0,lastActive=0,lastSave=0;
+function resetDetector(){cad=0;slow=null;fast=0;amp=1;above=false;lastStep=0;streak=0;pending=0}
+function sample(ax,ay,az,t){
+  if(!S.tracking)return;
+  var m=Math.sqrt(ax*ax+ay*ay+az*az);
+  if(!isFinite(m))return;
+  if(slow===null)slow=m;
+  slow+=0.02*(m-slow);               /* adaptive low-pass: isolates gravity / drift */
+  var dyn=m-slow;
+  if(Math.abs(dyn)>30)return;         /* violent shake: ignore */
+  fast+=0.3*(dyn-fast);               /* smoothing low-pass: removes jitter */
+  amp+=0.01*(Math.abs(fast)-amp);     /* adaptive amplitude estimate */
+  var thr=Math.min(3.2,Math.max(0.7,amp*1.25));
+  if(!above&&fast>thr){
+    above=true;
+    var dt=t-lastStep;
+    if(dt>=300&&dt<=2000){streak++;cad=cad?cad*0.8+(60000/dt)*0.2:60000/dt}else if(dt>2000||lastStep===0){streak=1;pending=0}else{return}
+    lastStep=t;
+    if(streak<4){pending++}        /* hold early candidates until a walking rhythm is confirmed */
+    else if(streak===4){addSteps(pending+1);pending=0}
+    else addSteps(1);
+  }else if(above&&fast<thr*0.35){above=false}
+}
+function addSteps(n){
+  S.steps+=n;lastActive=Date.now();render();
+  if(lastActive-lastSave>3000){save();lastSave=lastActive}
+}
+var activeTimer=null;
+function activeTick(){if(S.tracking&&Date.now()-lastActive<3000){S.activeSec+=1;render()}}
+
+/* ---------- sensors ---------- */
+var sensor=null,motionOn=false,wake=null;
+function onMotion(e){
+  var a=e.acceleration&&e.acceleration.x!==null?e.acceleration:e.accelerationIncludingGravity;
+  if(!a||a.x===null)return;
+  sample(a.x||0,a.y||0,a.z||0,performance.now());
+}
+async function askPermission(){
+  if(typeof DeviceMotionEvent!=="undefined"&&typeof DeviceMotionEvent.requestPermission==="function"){
+    var r=await DeviceMotionEvent.requestPermission();
+    if(r!=="granted")throw new Error("denied");
+  }
+}
+async function startSensors(){
+  resetDetector();
+  var started=false;
+  if("LinearAccelerationSensor" in window){
+    try{
+      if(navigator.permissions&&navigator.permissions.query){
+        try{var ps=await navigator.permissions.query({name:"accelerometer"});if(ps.state==="denied")throw new Error("denied")}catch(pe){if(pe.message==="denied")throw pe}
+      }
+      sensor=new LinearAccelerationSensor({frequency:50});
+      sensor.addEventListener("reading",function(){sample(sensor.x||0,sensor.y||0,sensor.z||0,performance.now())});
+      sensor.addEventListener("error",function(ev){
+        var n=ev.error&&ev.error.name;sensor=null;
+        if(n==="NotAllowedError"){toast("Motion access is blocked. Allow motion sensors in your browser's site settings, then tap Start Tracking again.");stop(true)}
+        else if(!motionOn){attachMotion()}
+      });
+      sensor.start();started=true;
+    }catch(e){sensor=null;if(e&&e.message==="denied"){throw e}}
+  }
+  if(!started)attachMotion();
+}
+function attachMotion(){
+  if(motionOn)return;
+  if(typeof DeviceMotionEvent==="undefined"){throw new Error("unsupported")}
+  window.addEventListener("devicemotion",onMotion);motionOn=true;
+}
+function stopSensors(){
+  if(sensor){try{sensor.stop()}catch(e){}sensor=null}
+  if(motionOn){window.removeEventListener("devicemotion",onMotion);motionOn=false}
+}
+async function lockScreen(){
+  try{if("wakeLock" in navigator){wake=await navigator.wakeLock.request("screen");wake.addEventListener("release",function(){wake=null})}}catch(e){}
+}
+function unlockScreen(){try{if(wake)wake.release()}catch(e){}wake=null}
+document.addEventListener("visibilitychange",function(){if(document.visibilityState==="visible"&&S.tracking&&!wake)lockScreen()});
+
+/* ---------- controls ---------- */
+function ui(){
+  $("startBtn").disabled=S.tracking;$("pauseBtn").disabled=!S.tracking;
+  $("startBtn").textContent=S.steps>0&&!S.tracking?"Resume Tracking":"Start Tracking";
+  status(S.tracking?"Tracking is <b>active</b>. Carry your phone as you walk.":(S.steps>0?"Tracking is paused.":"Ready when you are."));
+}
+async function start(){
+  if(!window.isSecureContext){toast("Motion sensors need a secure connection. Open this app over HTTPS.");return}
+  try{
+    await askPermission();
+    S.tracking=true;
+    await startSensors();
+    if(!S.tracking)return;
+    lockScreen();
+    clearInterval(activeTimer);activeTimer=setInterval(activeTick,1000);
+    save();ui();toast("Tracking started. Keep the screen on for the most accurate count.",3200);
+  }catch(e){
+    S.tracking=false;stopSensors();ui();
+    if(e&&e.message==="denied")toast("Motion access was denied. On iPhone: Settings › Safari › Motion & Orientation Access. On Android: Site settings › Motion sensors.");
+    else toast("This device or browser has no accelerometer. Try Chrome on Android or Safari on iPhone.");
+  }
+}
+function stop(silent){
+  S.tracking=false;stopSensors();unlockScreen();clearInterval(activeTimer);save();ui();
+  if(!silent)toast("Tracking paused. Your progress is saved.",2600);
+}
+function reset(){
+  if(!window.confirm("Reset today's steps, distance, calories and active time? Past days stay saved."))return;
+  var was=S.tracking;stop(true);S.steps=0;S.activeSec=0;S.meal=null;S.history[S.date]=0;save();render();ui();
+  toast("Today's metrics were reset.",2600);if(was)start();
+}
+$("startBtn").addEventListener("click",start);
+$("pauseBtn").addEventListener("click",function(){stop(false)});
+$("resetBtn").addEventListener("click",reset);
+function bindInput(id,key,min,max){
+  var el=$(id);el.value=S[key];
+  el.addEventListener("change",function(){var v=parseFloat(el.value);
+    if(!isFinite(v)||v<min||v>max){el.value=S[key];toast("Enter a value between "+fmt(min)+" and "+fmt(max)+".",2800);return}
+    S[key]=v;save();render()});
+}
+
+/* ---------- PWA ---------- */
+function icon(size){
+  var c=document.createElement("canvas");c.width=c.height=size;var x=c.getContext("2d");
+  x.fillStyle="#0B0B0C";x.fillRect(0,0,size,size);
+  var g=x.createLinearGradient(0,0,size,size);g.addColorStop(0,"#F3E3A0");g.addColorStop(.5,"#D4AF37");g.addColorStop(1,"#9c7a1a");
+  x.strokeStyle=g;x.lineWidth=size*.06;x.lineCap="round";x.beginPath();x.arc(size/2,size/2,size*.31,-Math.PI/2,Math.PI*1.1);x.stroke();
+  x.fillStyle=g;x.font="600 "+size*.3+"px Georgia,serif";x.textAlign="center";x.textBaseline="middle";x.fillText("A",size/2,size/2+size*.02);
+  return c.toDataURL("image/png");
+}
+function setupPWA(){
+  try{
+    var i192=icon(192),i512=icon(512);
+    $("touchIcon").href=i192;
+    var man={name:"Aurum Steps",short_name:"Aurum",start_url:location.href.split("#")[0],scope:location.href.split("#")[0].replace(/[^\/]*$/,""),display:"standalone",orientation:"portrait",background_color:"#0B0B0C",theme_color:"#0B0B0C",
+      icons:[{src:i192,sizes:"192x192",type:"image/png",purpose:"any maskable"},{src:i512,sizes:"512x512",type:"image/png",purpose:"any maskable"}]};
+    $("manifestLink").href=URL.createObjectURL(new Blob([JSON.stringify(man)],{type:"application/manifest+json"}));
+  }catch(e){}
+  if("serviceWorker" in navigator&&window.isSecureContext){
+    navigator.serviceWorker.register("sw.js").catch(function(){});
+  }
+}
+
+/* ---------- init ---------- */
+load();
+$("quote").textContent=QUOTES[new Date().getDate()%QUOTES.length];
+Array.prototype.forEach.call(document.querySelectorAll("[data-meal]"),function(b){b.addEventListener("click",function(){logMeal(b.getAttribute("data-meal"))})});
+bindInput("inH","height",100,230);bindInput("inW","weight",30,250);bindInput("inG","goal",1000,100000);
+tick();setInterval(tick,1000);
+S.tracking=false;render();ui();setupPWA();
+window.addEventListener("pagehide",save);
+})();
+</script>
+</body>
+</html>
